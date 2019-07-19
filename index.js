@@ -22,10 +22,12 @@ var connection = mysql.createConnection({
 });
 
 passport.serializeUser(function(user, done) {
+  console.log('serializing', user)
   done(null, user);
 });
 
 passport.deserializeUser(function(user, done) {
+  console.log('deserializing', user)
   done(null, user);
 });
 
@@ -36,7 +38,7 @@ passport.use(
     callbackURL: "https://test.joshuamoore.dev/auth/google"
   },
   function(accessToken, refreshToken, profile, cb){
-    console.log({googleId: profile});
+    console.log({googleId: profile.displayName});
     return cb(null, {googleId: profile.id});
   }
 ));

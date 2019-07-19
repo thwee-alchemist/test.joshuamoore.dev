@@ -33,7 +33,7 @@ function TestCtrl($scope){
     {name: 'from', type: 'Date'},
     {name: 'until', type: 'Date'},
     {name: 'picture', type: 'Text'},
-    {name: 'text', type: 'Text', ph: "Write something brilliant"}
+    {name: 'text', type: 'Text', ph: "A place for notes..."}
   ];
 
   $scope.groupFields = [
@@ -41,7 +41,7 @@ function TestCtrl($scope){
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date'},
     {name: 'until', type: 'Date'},
-    {name: 'text', type: 'Text', ph: "Write something brilliant"}
+    {name: 'text', type: 'Text', ph: "A place for notes..."}
   ];
 
 
@@ -52,7 +52,7 @@ function TestCtrl($scope){
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date', ph: undefined},
     {name: 'until', type: 'Date', ph: undefined},
-    {name: 'text', type: 'Text', ph: "Write something brilliant"}    
+    {name: 'text', type: 'Text', ph: "A place for notes..."}    
   ];
 
 
