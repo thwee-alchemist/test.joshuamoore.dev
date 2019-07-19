@@ -4,12 +4,22 @@ use leudla;
 \! echo "Dropping objects ...";
 drop table if exists relationship;
 drop table if exists entity;
+drop table if exists visitor;
 drop procedure if exists insert_entity;
 drop procedure if exists insert_relationship;
 drop procedure if exists share_entity;
 drop procedure if exists share_relationship;
+drop procedure if exists upsert_visitor;
 \! echo "... done";
 
+\! echo "Creating visitor table ... ";
+create table visitor (
+  _id int auto_increment primary key,
+  _google_id varchar(30),
+  _display_name varchar(250),
+  _picture_url varchar(250)
+);
+\! echo "... done";
 
 \! echo "Creating entity table ...";
 create table entity (
@@ -47,6 +57,42 @@ create table relationship (
     on delete cascade
 );
 \! echo "... done";
+
+\! echo "Creating upsert visitor stored procedure ...";
+delimiter //
+create procedure upsert_visitor
+(
+  in _google_id varchar(30),
+  in _display_name varchar(250),
+  in _picture_url varchar(250),
+  out _id int
+)
+begin
+  declare __visitor_id varchar(50);
+
+  set autocommit = 0;
+  start transaction;
+
+  select v._id into __visitor_id
+  from visitor v
+  where v._google_id = _google_id;
+
+  case 
+    when __visitor_id is null then begin
+      insert into visitor (_google_id, _display_name, _picture_url)
+      values (_google_id, _display_name, _picture_url);
+
+      set __visitor_id = last_insert_id();
+    end;
+  end case;
+
+  select _id = __visitor_id;
+
+  commit;
+end //
+delimiter ;
+\! echo "... done";
+
 
 \! echo "Creating insert_entity stored procedure ...";
 delimiter //
