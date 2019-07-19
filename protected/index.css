@@ -1,0 +1,13 @@
+html, body {
+  height: 100vh;
+}
+
+#container {
+  height: calc(100vh - (56 + 16));
+}
+
+#edit {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: calc(100vh - (56 + 16));
+}

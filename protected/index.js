@@ -32,7 +32,6 @@ function TestCtrl($scope){
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date'},
     {name: 'until', type: 'Date'},
-    {name: 'picture', type: 'Text'},
     {name: 'text', type: 'Text', ph: "A place for notes..."}
   ];
 
@@ -55,7 +54,18 @@ function TestCtrl($scope){
     {name: 'text', type: 'Text', ph: "A place for notes..."}    
   ];
 
+  $scope.edit_open = true;
 
+  $scope.socket = io();
+
+  $scope.socket.on('refresh', function(){
+    alert("An error occured. Don't worry, we'll redirect you, so you can reconneect");
+    location.href = '/';
+  });
+
+  $scope.$watchCollection('persons', function(newVals, oldVals){
+    console.log(newVals, oldVals);
+  })
 
 }
 

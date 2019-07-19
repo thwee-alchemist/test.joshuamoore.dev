@@ -62,7 +62,7 @@ create table relationship (
 delimiter //
 create procedure upsert_visitor
 (
-  in _google_id varchar(30),
+  in _google_id varchar(50),
   in _display_name varchar(250),
   in _picture_url varchar(250),
   out _id int
@@ -77,16 +77,17 @@ begin
   from visitor v
   where v._google_id = _google_id;
 
-  case 
-    when __visitor_id is null then begin
+  case when __visitor_id is null 
+  then 
+    begin
       insert into visitor (_google_id, _display_name, _picture_url)
       values (_google_id, _display_name, _picture_url);
 
       set __visitor_id = last_insert_id();
     end;
+  else
+    select _id = __visitor_id;
   end case;
-
-  select _id = __visitor_id;
 
   commit;
 end //

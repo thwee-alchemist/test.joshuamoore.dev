@@ -3,41 +3,46 @@
   <head>
     <title>test.joshuamoore.dev</title>
     <link rel="stylesheet" href="/vendor/bootstrap.min.css">
+    
     <script src="/vendor/jquery.min.js"></script>
     <script src="/vendor/bootstrap.min.js"></script>
     <script src="/vendor/angular.min.js"></script>
+    <script src="/vendor/socket.io.js"></script>
 
     <script src="https://kit.fontawesome.com/53c4d53fc2.js"></script>
 
     <script src="index.js"></script>
     <script src="editable-list.js"></script>
+    <link rel="stylesheet" href="index.css">
   </head>
   <body ng-controller="testCtrl">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <a class="navbar-brand" href="#">leudla.net</a>
     </nav>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-3 border-right h-100">
+    <div id="container" class="container-fluid">
+      <!-- <div class="row"> -->
+        <i class="fas fa-chevron-left float-right" ng-show="edit_open" ng-click="edit_open = !edit_open"></i>
+        <i class="fas fa-chevron-right float-right" ng-show="!edit_open" ng-click="edit_open = !edit_open"></i>
 
+        <div id="edit" class="col-3 border-right h-100" ng-class="{'collapse': !edit_open}">
           <!-- Nav Tabs-->
-          <ul class="nav nav-tabs" id="edit-tab" role="tablist">
-            <li class="nav-item">
+          <ul class="nav nav-tabs nav-justified" id="edit-tab" role="tablist">
+            <li class="nav-item col-xs-6">
               <a class="nav-link active" href="#edit-persons" id="persons-tab" data-toggle="tab" role="tab" aria-controls="edit-persons" aria-selected="true">
-                <i class="fas fa-user"></i>
-                Persons
+                <label><i class="fas fa-user"></i> <br>People</label>
+                
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item col-xs-6">
               <a class="nav-link" href="#edit-groups" id="groups-tab" data-toggle="tab" role="tab" aria-controls="edit-groups" aria-selected="false">
-                <i class="fas fa-users"></i>
-                Groups
+                <label><i class="fas fa-users"></i><br>Groups</label>
+                
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item col-xs-6">
               <a class="nav-link" href="#edit-relationships" id="relationships-tab" data-toggle="tab" role="tab" aria-controls="edit-relationships" aria-selected="false">
-                <i class="fas fa-users-cog"></i>
-                Relationships
+                <label><i class="fas fa-users-cog"></i><br>Relationships</label></i>
+                
               </a>
             </li>
 
@@ -69,7 +74,7 @@
             </div>
           </div>
         </div>
-      </div>
+      <!-- </div> -->
     </div>
   </body>
 </html>
