@@ -1,0 +1,31 @@
+<div>
+  <form>
+    <span ng-repeat="field in $ctrl.fields">
+      <label class="lbl">{{field.name | capitalize}}:</label>
+      <input class="form-control" ng-if="field.type == 'String'" placeholder="{{field.ph}}" ng-model="$ctrl.item[field.name]">
+      <input class="form-control" ng-if="field.type == 'Number'" type="number" ng-model="$ctrl.item[field.name]">
+      <input class="form-control" ng-if="field.type == 'Date'" type="date" ng-model="$ctrl.item[field.name]" ng-value="field.ph">
+      <textarea class="form-control" ng-show="field.type == 'Text'" ng-model="$ctrl.item[field.name]" placeholder="{{field.ph}}"></textarea>
+      <select 
+        class="form-control" 
+        ng-if="field.type == 'Select'" 
+        ng-model="$ctrl.item[field.name]"
+        ng-options="option[field.options.displayField] for option in field.options.model track by option[field.options.valueField]">
+      </select>
+        
+    </span>
+    <button ng-show="editing == -1" class="btn btn-outline-success form-control" ng-click="$ctrl.addItem($ctrl.item)">+</button>
+    
+    <button ng-show="editing > -1" class="btn btn-outline-success form-control" ng-click="$ctrl.saveEdit($ctrl.item)">Save</button>
+    <button ng-show="editing > -1" class="btn btn-outline-secondary form-control" ng-click="$ctrl.cancelEdit($ctrl.item)">Cancel</button>
+  </form>
+  <br>
+
+  <ul class="list-unstyled">
+    <li ng-repeat="item in $ctrl.model track by $index">
+      <button class="btn btn-outline-danger" ng-click="$ctrl.removeItem($index)">-</button>
+      <button class="btn btn-outline-secondary" ng-click="$ctrl.editItem($index)">...</button>
+      {{$ctrl.itemToString.apply(item, [])}}
+    </ng-repeat">
+  </ul>
+</div>

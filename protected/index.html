@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html ng-app="testApp">
+  <head>
+    <title>test.joshuamoore.dev</title>
+    <link rel="stylesheet" href="/vendor/bootstrap.min.css">
+    <script src="/vendor/jquery.min.js"></script>
+    <script src="/vendor/bootstrap.min.js"></script>
+    <script src="/vendor/angular.min.js"></script>
+
+    <script src="https://kit.fontawesome.com/53c4d53fc2.js"></script>
+
+    <script src="index.js"></script>
+    <script src="editable-list.js"></script>
+  </head>
+  <body ng-controller="testCtrl">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">leudla.net</a>
+    </nav>
+    <div class="container-fluid wrapper">
+      <div class="row">
+        <div class="col-md-4">
+          <label>Persons</label><br>
+          <editable-list 
+            model="persons"
+            fields="personFields"
+            item-to-string="entityToString"
+          </editable-list>
+        </div>
+
+        <div class="col-md-4">
+          <label>Groups</label><br>
+          <editable-list 
+            model="groups"
+            fields="groupFields"
+            item-to-string="entityToString">
+          </editable-list>
+        </div>
+
+        <div class="col-md-4">
+          <label>Relationships</label><br>
+          <editable-list 
+            model="relationships"
+            fields="relationshipFields"
+            item-to-string="relationshipToString">
+          </editable-list>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

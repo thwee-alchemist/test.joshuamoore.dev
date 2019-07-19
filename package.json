@@ -1,0 +1,25 @@
+{
+  "name": "test.joshuamoore.dev",
+  "version": "0.0.1",
+  "description": "future leudla.net",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Joshua Marshall Moore <joshua.moore@leudla.net>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "angular": "^1.7.8",
+    "body-parser": "^1.19.0",
+    "bootstrap": "^4.3.1",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "jquery": "^3.4.1",
+    "mysql": "^2.17.1",
+    "passport": "^0.4.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "passport-openid": "^0.4.0"
+  }
+}
