@@ -22,9 +22,10 @@
     <div id="container" class="container-fluid">
       <!-- <div class="row"> -->
         <i class="fas fa-chevron-left float-right" ng-show="edit_open" ng-click="edit_open = !edit_open"></i>
-        <i class="fas fa-chevron-right float-right" ng-show="!edit_open" ng-click="edit_open = !edit_open"></i>
+        
+        <div class="col-3 border-right" ng-class="{'collapse': !edit_open">
+          <i class="fas fa-chevron-right float-right" ng-show="!edit_open" ng-click="edit_open = !edit_open"></i>
 
-        <div id="edit" class="col-3 border-right h-100" ng-class="{'collapse': !edit_open}">
           <!-- Nav Tabs-->
           <ul class="nav nav-tabs nav-justified" id="edit-tab" role="tablist">
             <li class="nav-item col-xs-6">
@@ -45,9 +46,9 @@
                 
               </a>
             </li>
-
           </ul>
-
+        </div>
+        <div id="edit" class="col-3 border-right h-100" ng-class="{'collapse': !edit_open}">
           <div class="tab-content">
             <div class="tab-pane active" id="edit-persons" role="tabpanel" aria-labelledby="persons-tab">
               <editable-list 

@@ -59,12 +59,23 @@ function TestCtrl($scope){
   $scope.socket = io();
 
   $scope.socket.on('refresh', function(){
-    alert("An error occured. Don't worry, we'll redirect you, so you can reconneect");
+    alert("An error occured, most likely the server has been restarted. Don't worry, sign back in, and you'll be good to go!");
     location.href = '/';
   });
 
-  $scope.$watchCollection('persons', function(newVals, oldVals){
-    console.log(newVals, oldVals);
+  $scope.$on('item added', (e, item) => {
+    $scope.socket.emit('item added', item);
+    e.stopPropagation();
+  })
+
+  $scope.$on('item updated', (e, item) => {
+    $scope.socket.emit('item updated', item);
+    e.stopPropagation();
+  });
+
+  $scope.$on('deleting item', (e, item) =>{
+    $scope.socket.emit('deleting item', item);
+    e.stopPropagation();
   })
 
 }

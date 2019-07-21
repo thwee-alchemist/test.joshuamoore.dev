@@ -14,11 +14,12 @@ function EditableListCtrl($scope){
       switch(field.type){
         case 'String':
         case 'Number':
-        case 'Date':
           this.templateObj[field.name] = Reflect.construct(eval(field.type), []);
           break;
+
+        case 'Date':
         default:
-          this.templateObj[field.name] = '';
+          this.templateObj[field.name] = null;
       }
     })
 
@@ -27,6 +28,7 @@ function EditableListCtrl($scope){
 
   this.addItem = function(item){
     this.model.push(item);
+    $scope.$emit('item added', item);
     this.item = Object.assign({}, this.templateObj);
   };
 
@@ -36,8 +38,9 @@ function EditableListCtrl($scope){
   };
 
   this.saveEdit = function(item){
-    Object.assign(this.model[$scope.editing], this.item);
+    Object.assign(this.model[$scope.editing], item);
     this.item = Object.assign({}, this.templateObj);
+    $scope.$emit('item updated', item);
     $scope.editing = -1;
   };
 
@@ -47,10 +50,9 @@ function EditableListCtrl($scope){
   };
 
   this.removeItem = function(idx){
+    $scope.$emit('deleting item', this.model[idx]);
     this.model.splice(idx, 1);
   };
-
-
 }
 
 testApp.filter('capitalize', function() {

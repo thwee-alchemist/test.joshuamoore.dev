@@ -69,8 +69,6 @@ app.use(
   express.static('protected')
 )
 
-
-
 app.use('/', express.static('public'))
 
 app.use('/secured', passport.authenticate('google'), express.static('public'))
@@ -82,11 +80,23 @@ io.use(function(socket, next){
 })
 io.on('connection', function(socket){
   try{
-    var userId = socket.request.session.passport.user;
-    console.log('socket userId: ', userId);
+    var user = socket.request.session.passport.user;
+    socket.user = user;
+    console.log('socket userId: ', user.displayName);
   }catch(e){
     console.error(e);
     socket.emit('refresh');
-  
   }
-})
+
+  socket.on('item added', item => {
+    console.log(socket.user.displayName, 'added', item);
+  });
+
+  socket.on('item updated', item => {
+    console.log(socket.user.displayName, 'updated', item);
+  });
+
+  socket.on('deleting item', item => {
+    console.log(socket.user.displayName, 'deleted', item);
+  });
+});
