@@ -33,7 +33,7 @@
           id="graph"
           class="form-control" 
           ng-model="graph"
-          ng-change="selectGraph"
+          ng-change="selectGraph();"
           ng-options="graph.name for graph in graphs track by graph.id">
         </select>
         <button 

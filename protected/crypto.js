@@ -64,7 +64,7 @@ async function decrypt(ciphertext, secretKey, iv){
   return dec.decode(decrypted);
 }
 
-async function deriveSecretKey(privateKey, publicKey) {
+async function _deriveSecretKey(privateKey, publicKey) {
   console.log('privateKey', privateKey);
   console.log('publicKey', publicKey)
   return await crypto.subtle.deriveKey(
@@ -159,7 +159,7 @@ async function setupCrypto($scope){
     }else{
       publicKey = $scope.keyPair.publicKey;
     }
-    $scope.secretKey = await deriveSecretKey($scope.keyPair.privateKey, publicKey)
+    $scope.secretKey = await _deriveSecretKey($scope.keyPair.privateKey, publicKey)
 
     return $scope.secretKey;
   }
@@ -213,17 +213,24 @@ async function setupCrypto($scope){
     }
 
     try{
-      var r = await encrypt(cleartext, $scope.secretKey)
+      var r = await encrypt(cleartext, $scope.secretKey);
       ciphertext = buffer2string(r.ciphertext);
+      console.log('ciphertext', ciphertext)
     }catch(e){
       console.error(e)
     }
 
-    return ciphertext;
+    return r;
   }
 
-  $scope.decryptMsg = async function(msg, secretKey, iv){
-    var ciphertext = await decrypt(msg ? msg : $scope.ciphertext, secretKey ? secretKey : $scope.secretKey, iv)
+  $scope.decryptMsg = async function(msg, other){
+    console.assert(msg, other);
+
+    if(other == 'self'){ // that breaks the current fourd
+      var secretKey = $scope.deriveSecretKey('self');
+
+    }
+    var ciphertext = await decrypt(msg.ciphertext, secretKey, msg.iv)
     return ciphertext;
   }
 
@@ -234,7 +241,7 @@ async function setupCrypto($scope){
       name: 'ECDH',
       namedCurve: 'P-384'
     }, false, []);
-    var secretKey = await deriveSecretKey($scope.keyPair.privateKey, publicKey)
+    var secretKey = await $scope.deriveSecretKey(other);
 
     var result = await encrypt($scope.text, secretKey);
     var toBeSent = {to: otherId, msg: result.ciphertext, iv: result.iv};

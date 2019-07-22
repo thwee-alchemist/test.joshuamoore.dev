@@ -76,18 +76,30 @@ function TestCtrl($scope){
   setupCrypto($scope);
 
   $scope.socket.on('refresh', function(){
-    alert("The server and your browser are out of sync, probably because I restarted the server. You'll be redirected and can log back in. This will stabilize in the future");
+    alert("The server and your browser are out of sync, probably because I restarted the server. You'll be redirected and can log back in.");
     location.href = '/';
   });
 
-  $scope.$on('item added', (e, item) => {
+  $scope.$on('item added', async (e, item) => {
     // todo revisit this function
     var newItem = {};
+
+    console.log('item added', item, e)
+
     for(var field in item){
-      newItem[field] = item[field] ? $scope.encryptMsg(item[field]) : '';
-    } 
+      newItem[field] = !(field in ['graph_id', 'id', 'source', 'target', 'type']) && item[field]  ?
+        JSON.stringify(await $scope.encryptMsg(item[field])) : 
+        item[field]; // can be extended to in
+    }
+
+    $scope.socket.off('item added response');
+    $scope.socket.on('item added response', (result) => {
+      console.log('item added response');
+      newItem.id = result.id;
+    })
+
     $scope.socket.emit('item added', newItem);
-    e.stopPropagation();
+    console.log('item added emitted', newItem);
   })
 
   $scope.$on('item updated', (e, item) => {
@@ -122,44 +134,75 @@ function TestCtrl($scope){
   /* fetch graphs */
   $scope.socket.on('graphs response', result => {
     console.log('fresh graphs', result)
-    result.map(g => {
-      $scope.graphs = [];
-      $scope.graphs.push({
-        id: g._id,
-        name: g._name
-      })
 
-    })
+    if($scope.graphs.length > 0){
+      $scope.graphs = result.map(g => {
+        return {
+          id: g._id,
+          name: g._name
+        }
+      });
+  
+      $scope.graph = $scope.graphs[0];
+      $scope.socket.emit('persons', $scope.graph.id);
+    }
 
-    $scope.graph = $scope.graphs[0];
     $scope.$apply();
   });
 
-  $scope.socket.emit('graphs');
+  $scope.socket.on('persons response', result => {
+    console.log('fresh people', result);
 
-  /* fetch persons*/
-  $scope.on('persons response', (persons) => {
-    $scope.persons = persons;
+    $scope.persons = result.map(async p => {
+      var entity = {
+        name: p._name ? (await $scope.decryptMsg(p._name, 'self')) : null,
+        picture: p._texture ? (await $scope.decryptMsg(p._texture, 'self')) : null,
+        type: 'person',
+        from: p._from ? (await $scope.decryptMsg(p._from, 'self')): null,
+        until: p._until ? (await $scope.decryptMsg(p._until, 'self')) : null,
+        text: p._text ? (await $scope.decryptMsg(p._text, 'self')) : null,
+        data: p._data ? (await $scope.decryptMsg(p._data, 'self')) : null // todo json parse
+      };
+
+      console.log('decrypted', entity);
+
+      return entity;
+    });
+
+    $scope.$apply();
   })
+
+  $scope.socket.emit('graphs');
 
   $scope.addGraph = function(){
     var name = prompt("Please enter a name for the graph:");
     if(name){
-      $scope.socket.emit('add graph', name);
-      $scope.socket.once('add graph response', id => {
-        $scope.graphs.push({
+      $scope.off('add graph response')
+      $scope.socket.on('add graph response', id => {
+        $scope.socket.emit('select graph')
+        
+        var graph = {
           'id': id,
           'name': name
-        })
+        };
+        $scope.graphs.push(graph)
+        $scope.graph = graph;
+
+        $scope.socket.emit('persons')
 
         $scope.$apply();
       });
+
+      $scope.socket.emit('add graph', name);
     }
   };
 
   $scope.selectGraph = function(){
-    $scope.socket.emit('persons');
+    console.log('selection changed')
+    $scope.socket.emit('persons', $scope.graph.id);
   }
+
+  $scope.socket.on('error', console.alert)
 }
 
 

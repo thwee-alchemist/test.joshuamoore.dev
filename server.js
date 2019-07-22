@@ -38,6 +38,7 @@ var getVisitorId = async function(googleId){
     try{
       conn.query(`select v._id from visitor v where v._google_id = ?;`, [googleId], (error, results, fields) => {
         if(error) reject(error);
+        console.log(results);
         resolve(results[0]._id);
       })
     }catch(e){
@@ -63,7 +64,6 @@ app.get(
   '/auth/google',
   passport.authenticate('google', {scope: ['profile', 'email']}),
   async (req, res) => {
-    console.log('/auth/google, req.user', req.user);
     res.redirect('/protected');
   }
 )
@@ -97,13 +97,20 @@ io.use(function(socket, next){
 })
 io.on('connection', function(socket){
 
+  try{
+    socket.visitorId = socket.request.session.passport.user.visitorId;
+  }catch(e){
+    socket.emit('refresh', e);
+  }
+
   socket.on('item added', item => {
+    console.log('item added', socket.visitorId, item)
     switch(item.type){
-      case "entity":
-        getVisitorId(socket).then(id => {
-          conn.query('call upsert_entity(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+      case "person":
+        conn.beginTransaction((error) => {
+          conn.query('call insert_entity(?, ?, ?, ?, ?, ?, ?, ?, ?);', 
           [
-            id,
+            socket.visitorId,
             item.name, 
             item.from,
             item.until,
@@ -114,11 +121,17 @@ io.on('connection', function(socket){
             item.graph_id
           ],
           function(error, results){
-            if(error) throw error;
-            socket.broadcast.to(`graph ${item.graph_id}`).emit('item added', {"id": results.insertId, "item": item});
+            console.log('insert_entity ', error, results)
+            if(error) socket.emit('error', error)
+            socket.emit('item added response', {"id": results.insertId, "item": item});
+          });
+
+          conn.commit(err => {
+            console.log('err', err)
+            socket.emit('error', err)
           });
         })
-        break;
+       break;
       case "relationship":
         break;
 
@@ -133,24 +146,23 @@ io.on('connection', function(socket){
   });
 
   socket.on('deleting item', item => {
-    console.log(socket.user.displayName, 'deleted', item);
+    console.log('deleted', item);
   });
 
   socket.on('publicKey', (publicKey) => {
+    console.log('public key received')
     
     if(!publicKeys.find(key => key.id == socket.id)){
       publicKeys.push({id: socket.id, key: publicKey})
       socket.broadcast.emit('publicKey', {id: socket.id, key: publicKey});
-      console.log(publicKey)
     }
 
     try {
-      console.log(socket.user);
       conn.query(`
         insert into device (_visitor_id, _public_key)
         values (?, ?);
         select last_insert_id();
-      `, [JSON.stringify(publicKey), socket.user], function(error, results, field){
+      `, [socket.visitorId, JSON.stringify(publicKey)], function(error, results, field){
         if(error) throw error;
         socket.emit('publicKeyResponse', results)
       })
@@ -176,12 +188,12 @@ io.on('connection', function(socket){
   });
 
   socket.on('add graph', name => {
-    console.log('add graph, visitorId', socket.request.session.passport.user.visitorId)
+    console.log('add graph, visitorId', socket.visitorId)
     conn.beginTransaction(err => {
       conn.query(`
         insert into graph (_visitor_id, _name)
         values (?, ?);
-      `, [socket.request.session.passport.user.visitorId, name], 
+      `, [socket.visitorId, name], 
       function(error, result){
         if(error) console.error(error);
         conn.commit((err) => {
@@ -194,7 +206,7 @@ io.on('connection', function(socket){
 
   socket.on('graphs', () => {
 
-    console.log('graphs, visitorId', socket.request.session.passport.user.visitorId)
+    console.log('graphs, visitorId', socket.visitorId)
     conn.query(`
       select g._id, g._name 
       from graph g 
@@ -206,11 +218,35 @@ io.on('connection', function(socket){
       });
   })
 
+  socket.on('persons', (graph_id) => {
+    try {
+      conn.query(`
+        select e.*
+        from entity e
+        where e._visitor_id = ?
+        and e._graph_id = ? 
+        and e._type = 'person';
+      `, [socket.visitorId, graph_id], 
+      (error, result) => {
+        if(error) throw error;
+        else{
+          console.log(result)
+          socket.emit('persons response', result);
+        }
+      })
+    }catch(e){
+      socket.emit('error', e);
+    }
+  })
+
+  /*
   socket.on('select graph', id => {
+    /* let's skip that for now
+    console.log(')
     if(socket.currentRoom);
-    socket.leave(socket.currentRoom);
+    socket.leave(socket.currentRoom)
     socket.join(`graph ${id}`);
     socket.currentRoom = `graph ${id}`;
-
   })
+  */
 });

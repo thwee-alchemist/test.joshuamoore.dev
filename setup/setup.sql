@@ -62,13 +62,13 @@ create table graph (
 \! echo "Creating entity table ...";
 create table entity (
   _id int auto_increment primary key,
-  _user_id int,
-  _name varchar(250),
-  _from datetime,
-  _until datetime,
+  _visitor_id int,
+  _name text,
+  _from text,
+  _until text,
   _texture text,
   _text text,
-  _data json, 
+  _data text, 
   _type varchar(50),
   _graph_id int,
 
@@ -81,7 +81,7 @@ create table entity (
 \! echo "Creating relationship table ..."
 create table relationship (
   _id int auto_increment primary key,
-  _user_id int,
+  _visitor_id int,
   _entity_id int,
   _source_id int,
   _target_id int,
@@ -146,13 +146,13 @@ delimiter ;
 delimiter //
 create procedure insert_entity
 (
-  in _user_id int, 
-  in _name varchar(250),
-  in _from datetime,
-  in _until datetime,
+  in _visitor_id int, 
+  in _name text,
+  in _from text,
+  in _until text,
   in _texture text,
   in _text text,
-  in _data json,
+  in _data text,
   in _type varchar(50),
   in _graph_id int
 )
@@ -161,8 +161,8 @@ begin
 
   start transaction;
 
-  insert into entity (_user_id, _name, _from, _until, _texture, _text, _data, _type, _graph_id)
-  values (_user_id, _name, _from, _until, _texture, _data, _type, graph_id);
+  insert into entity (_visitor_id, _name, _from, _until, _texture, _text, _data, _type, _graph_id)
+  values (_visitor_id, _name, _from, _until, _texture, _data, _type, graph_id);
 
   commit;
 end //
@@ -183,8 +183,7 @@ create procedure insert_relationship
   in _texture text,
   in _text text,
   in _data json,
-  in _type varchar(50),
-  out _id int
+  in _type varchar(50)
 )
 begin
   set autocommit = 0;
@@ -195,7 +194,7 @@ begin
   insert into relationship(_user_id, _entity_id, _source_id, _target_id, _type)
   values (_user_id, last_insert_id, _source_id, _target_id);
 
-  set _id = last_insert_id();
+  select last_insert_id() as _id;
 
   commit;
 end //
