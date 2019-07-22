@@ -72,7 +72,7 @@ app.use(
 app.use('/', express.static('public'))
 
 app.use('/secured', passport.authenticate('google'), express.static('public'))
-var server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+var server = app.listen(port, () => console.log(`Leudla app listening on port ${port}!`))
 
 var publicKeys = [];
 
@@ -84,20 +84,44 @@ io.on('connection', function(socket){
   try{
     var user = socket.request.session.passport.user;
     socket.user = user;
-    console.log('socket userId: ', user.displayName);
 
-    /*
-    conn.query(`
-      select
-    `, [user.userId])
-    */
+    conn.query(`call upsert_visitor(?, ?, ?, ?);`, [user.id, user.displayName, user.email, user.pictureUrl], (error, results, fields) => {
+      if(error) throw(error);
+      socket.user.id = results.insertId;
+    })
   }catch(e){
     console.error(e);
     socket.emit('refresh');
   }
 
   socket.on('item added', item => {
-    console.log(socket.user.displayName, 'added', item);
+    switch(item.type){
+      case "entity":
+        conn.query('call upsert_entity(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+          [
+            socket.user.id,
+            item.name, 
+            item.from,
+            item.until,
+            item.texture,
+            item.text, 
+            item.data, 
+            item.type, 
+            item.graph_id
+          ],
+          function(error, results){
+            if(error) throw error;
+            socket.of(`/${item.graph_id}`).broadcast('item added', {"id": results.insertId, "item": item});
+          });
+
+        break;
+      case "relationship":
+        break;
+
+    }
+    
+    // here would be time to use that fancy currying they speak of, but maybe it's just that. 
+    // also, is React a phase? 
   });
 
   socket.on('item updated', item => {
@@ -117,10 +141,11 @@ io.on('connection', function(socket){
     }
 
     try {
+      console.log(socket.user);
       conn.query(`
-        update visitor
-        set publicKey = ?
-        where _id = ?;
+        insert into device (_visitor_id, _public_key)
+        values (?, ?);
+        select last_insert_id();
       `, [JSON.stringify(publicKey), socket.user], function(error, results, field){
         if(error) throw error;
         socket.emit('publicKeyResponse', results)

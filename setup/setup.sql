@@ -2,11 +2,21 @@
 use leudla;
 
 \! echo "Dropping objects ...";
+/*
+truncate device;
+truncate visitor;
+truncate graph;
+truncate entity;
+truncate relationship;
+*/
+start transaction;
+
 drop table if exists relationship;
 drop table if exists entity;
-drop table if exists visitor;
-drop table if exists graph;
 drop table if exists device;
+drop table if exists graph;
+drop table if exists visitor;
+
 drop procedure if exists insert_entity;
 drop procedure if exists insert_relationship;
 drop procedure if exists share_entity;
@@ -20,6 +30,7 @@ create table visitor (
   _id int auto_increment primary key,
   _google_id varchar(30),
   _display_name varchar(250),
+  _email varchar(255),
   _picture_url varchar(250)
 );
 \! echo "... done";
@@ -27,12 +38,12 @@ create table visitor (
 \! echo "Creating device table ... ";
 create table device (
   _id int auto_increment primary key,
-  _visitor_id varchar(30),
-  _public_key json
+  _visitor_id int,
+  _public_key json,
 
   foreign key (_visitor_id)
     references visitor(_id)
-    on delete cascade;
+    on delete cascade
 );
 \! echo "... done"
 
@@ -95,8 +106,8 @@ create procedure upsert_visitor
 (
   in _google_id varchar(50),
   in _display_name varchar(250),
-  in _picture_url varchar(250),
-  out _id int
+  in _email varchar(255),
+  in _picture_url varchar(250)
 )
 begin
   declare __visitor_id varchar(50);
@@ -111,13 +122,9 @@ begin
   case when __visitor_id is null 
   then 
     begin
-      insert into visitor (_google_id, _display_name, _picture_url)
-      values (_google_id, _display_name, _picture_url);
-
-      set __visitor_id = last_insert_id();
+      insert into visitor (_google_id, _display_name, _email, _picture_url)
+      values (_google_id, _display_name, _email, _picture_url);
     end;
-  else
-    select _id = __visitor_id;
   end case;
 
   commit;
@@ -138,8 +145,7 @@ create procedure insert_entity
   in _text text,
   in _data json,
   in _type varchar(50),
-  in _graph_id int,
-  out _id int
+  in _graph_id int
 )
 begin
   set autocommit = 0;
@@ -148,8 +154,6 @@ begin
 
   insert into entity (_user_id, _name, _from, _until, _texture, _text, _data, _type, _graph_id)
   values (_user_id, _name, _from, _until, _texture, _data, _type, graph_id);
-
-  set _id = last_insert_id();
 
   commit;
 end //
@@ -296,3 +300,4 @@ end //
 delimiter ;
 \! echo "... done";
 
+commit;

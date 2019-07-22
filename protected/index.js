@@ -32,7 +32,8 @@ function TestCtrl($scope){
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date'},
     {name: 'until', type: 'Date'},
-    {name: 'text', type: 'Text', ph: "A place for notes..."}
+    {name: 'text', type: 'Text', ph: "A place for notes..."},
+    {name: 'type', type: 'hidden', ph: 'person'}
   ];
 
   $scope.groupFields = [
@@ -40,7 +41,8 @@ function TestCtrl($scope){
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date'},
     {name: 'until', type: 'Date'},
-    {name: 'text', type: 'Text', ph: "A place for notes..."}
+    {name: 'text', type: 'Text', ph: "A place for notes..."},
+    {name: 'type', type: 'hidden', ph: 'group'}
   ];
 
 
@@ -51,7 +53,7 @@ function TestCtrl($scope){
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date', ph: undefined},
     {name: 'until', type: 'Date', ph: undefined},
-    {name: 'text', type: 'Text', ph: "A place for notes..."}    
+    {name: 'text', type: 'Text', ph: "A place for notes..."},
   ];
 
   $scope.edit_open = true;

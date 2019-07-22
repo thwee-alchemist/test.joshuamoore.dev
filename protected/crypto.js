@@ -103,9 +103,7 @@ async function importKeyPair(keyData){
   const publicKey = await crypto.subtle.importKey('jwk', keyData.publicKey, {
     name: 'ECDH',
     namedCurve: 'P-384'
-  }, true, [])
-
-  
+  }, true, []);
 
   return {'publicKey': publicKey, 'privateKey': privateKey};
 }
