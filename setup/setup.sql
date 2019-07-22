@@ -102,8 +102,7 @@ create table relationship (
 
 \! echo "Creating upsert visitor stored procedure ...";
 delimiter //
-create procedure upsert_visitor
-(
+create procedure upsert_visitor (
   in _google_id varchar(50),
   in _display_name varchar(250),
   in _email varchar(255),
@@ -119,12 +118,21 @@ begin
   from visitor v
   where v._google_id = _google_id;
 
-  case when __visitor_id is null 
-  then 
-    begin
-      insert into visitor (_google_id, _display_name, _email, _picture_url)
-      values (_google_id, _display_name, _email, _picture_url);
-    end;
+  case 
+    when __visitor_id is null 
+    then 
+      begin
+        insert into visitor (_google_id, _display_name, _email, _picture_url)
+        values (_google_id, _display_name, _email, _picture_url);
+      end;
+
+    when __visitor_id is not null
+    then 
+      begin 
+        select id 
+        from visitor v
+        where v._google_id = _google_id;
+      end;
   end case;
 
   commit;
