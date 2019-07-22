@@ -87,7 +87,7 @@ io.on('connection', function(socket){
 
     conn.query(`call upsert_visitor(?, ?, ?, ?);`, [user.id, user.displayName, user.email, user.pictureUrl], (error, results, fields) => {
       if(error) throw(error);
-      socket.user.id = results.insertId;
+      socket.user.visitorId = results.insertId;
     })
   }catch(e){
     console.error(e);
@@ -99,7 +99,7 @@ io.on('connection', function(socket){
       case "entity":
         conn.query('call upsert_entity(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
           [
-            socket.user.id,
+            socket.user.visitorId,
             item.name, 
             item.from,
             item.until,

@@ -149,13 +149,18 @@ async function setupCrypto($scope){
 
 
   $scope.deriveSecretKey = async function(from){
-    var otherId = from ? from : document.querySelector('input[type=radio]:checked').id
-    var publicKeyData = $scope.publicKeys.find(key => key.id == otherId);
-    console.assert(publicKeyData.key)
-    var publicKey = await crypto.subtle.importKey('jwk', publicKeyData.key, {
-      name: 'ECDH',
-      namedCurve: 'P-384'
-    }, true, []);
+    var publicKey;
+    if(from != "self"){
+      var otherId = from ? from : document.querySelector('input[type=radio]:checked').id
+      var publicKeyData = $scope.publicKeys.find(key => key.id == otherId);
+      console.assert(publicKeyData.key)
+      publicKey = await crypto.subtle.importKey('jwk', publicKeyData.key, {
+        name: 'ECDH',
+        namedCurve: 'P-384'
+      }, true, []);  
+    }else{
+      publicKey = $scope.keyPair.publicKey;
+    }
     $scope.secretKey = await deriveSecretKey($scope.keyPair.privateKey, publicKey)
 
     return $scope.secretKey;
@@ -199,30 +204,29 @@ async function setupCrypto($scope){
     }
   })
 
-  $scope.encryptMsg = async function(){
-
+  $scope.encryptMsg = async function(cleartext){
+    var ciphertext;
     if(!$scope.secretKey){
       try{
-        $scope.secretKey = await $scope.deriveSecretKey();
+        $scope.secretKey = await $scope.deriveSecretKey('self'); // Thanks Britney!
       }catch(e){
         console.error(e);
       }
     }
 
     try{
-      var r = await encrypt($scope.text, $scope.secretKey)
-      $scope.ciphertext = buffer2string(r.ciphertext);
+      var r = await encrypt(cleartext, $scope.secretKey)
+      ciphertext = buffer2string(r.ciphertext);
     }catch(e){
       console.error(e)
     }
-    $scope.$apply();
-    return r;
+
+    return ciphertext;
   }
 
   $scope.decryptMsg = async function(msg, secretKey, iv){
-    $scope.ciphertext = await decrypt(msg ? msg : $scope.ciphertext, secretKey ? secretKey : $scope.secretKey, iv)
-    $scope.$apply();
-    return $scope.ciphertext;
+    var ciphertext = await decrypt(msg ? msg : $scope.ciphertext, secretKey ? secretKey : $scope.secretKey, iv)
+    return ciphertext;
   }
 
   $scope.send = async function(){

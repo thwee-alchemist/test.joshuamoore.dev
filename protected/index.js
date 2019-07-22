@@ -72,7 +72,11 @@ function TestCtrl($scope){
   });
 
   $scope.$on('item added', (e, item) => {
-    $scope.socket.emit('item added', item);
+    var newItem = {};
+    for(var field in item){
+      newItem[field] = $scope.encryptMsg(item[field]);
+    } 
+    $scope.socket.emit('item added', newItem);
     e.stopPropagation();
   })
 
