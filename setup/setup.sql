@@ -5,12 +5,16 @@ use leudla;
 drop table if exists relationship;
 drop table if exists entity;
 drop table if exists visitor;
+drop table if exists graph;
 drop procedure if exists insert_entity;
 drop procedure if exists insert_relationship;
 drop procedure if exists share_entity;
 drop procedure if exists share_relationship;
 drop procedure if exists upsert_visitor;
+
 \! echo "... done";
+
+
 
 \! echo "Creating visitor table ... ";
 create table visitor (
@@ -20,6 +24,17 @@ create table visitor (
   _picture_url varchar(250)
 );
 \! echo "... done";
+
+\! echo "Creating graph table ... ";
+create table graph (
+  _id int auto_increment primary key,
+  _visitor_id int,
+
+  foreign key (_visitor_id)
+    references visitor(_id)
+    on delete cascade
+);
+\! echo "... done"
 
 \! echo "Creating entity table ...";
 create table entity (
@@ -31,7 +46,12 @@ create table entity (
   _texture text,
   _text text,
   _data json, 
-  _type varchar(50)
+  _type varchar(50),
+  _graph_id int,
+
+  foreign key (_graph_id)
+    references graph(_id)
+    on delete cascade
 );
 \! echo "... done";
 
@@ -107,6 +127,7 @@ create procedure insert_entity
   in _text text,
   in _data json,
   in _type varchar(50),
+  in _graph_id int,
   out _id int
 )
 begin
@@ -114,8 +135,8 @@ begin
 
   start transaction;
 
-  insert into entity (_user_id, _name, _from, _until, _texture, _text, _data, _type)
-  values (_user_id, _name, _from, _until, _texture, _data, _type);
+  insert into entity (_user_id, _name, _from, _until, _texture, _text, _data, _type, _graph_id)
+  values (_user_id, _name, _from, _until, _texture, _data, _type, graph_id);
 
   set _id = last_insert_id();
 

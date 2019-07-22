@@ -58,6 +58,12 @@ function TestCtrl($scope){
 
   $scope.socket = io();
 
+
+  /*
+    Set up scope and socket events. 
+  */
+  setupCrypto($scope);
+
   $scope.socket.on('refresh', function(){
     alert("An error occured, most likely the server has been restarted. Don't worry, sign back in, and you'll be good to go!");
     location.href = '/';
@@ -76,8 +82,27 @@ function TestCtrl($scope){
   $scope.$on('deleting item', (e, item) =>{
     $scope.socket.emit('deleting item', item);
     e.stopPropagation();
-  })
+  });
 
+  $scope.onFileInput = (file) => {
+    var input;
+    if(file){
+      input = file;
+    }else{
+      input = $document('.file').files[0];
+    }
+  
+    var reader = new FileReader();
+
+    reader.onload = (e) => {
+      input = reader.result;
+      input = JSON.parse(input);
+    };
+    
+    reader.readAsText(input);
+  };
 }
+
+
 
 testApp.controller('testCtrl', TestCtrl)

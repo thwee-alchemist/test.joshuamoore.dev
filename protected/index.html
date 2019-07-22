@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="testApp">
   <head>
-    <title>test.joshuamoore.dev</title>
+    <title>leudla.net</title>
     <link rel="stylesheet" href="/vendor/bootstrap.min.css">
     
     <script src="/vendor/jquery.min.js"></script>
@@ -11,6 +11,7 @@
 
     <script src="https://kit.fontawesome.com/53c4d53fc2.js"></script>
 
+    <script src="crypto.js"></script>
     <script src="index.js"></script>
     <script src="editable-list.js"></script>
     <link rel="stylesheet" href="index.css">
@@ -18,64 +19,71 @@
   <body ng-controller="testCtrl">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <a class="navbar-brand" href="#">leudla.net</a>
+      <button class="navbar-nav navbar-right fas fas-save form-control" id="downloadKeyPair" ng-click="prepareDownload(keyPair); $(this).click();" id="downloadKeyPair">Download your key pair</button>
+      
+      <input class="navbar-nav navbar-right form-control" id="keyPairUpload" type="file">
     </nav>
     <div id="container" class="container-fluid">
-      <!-- <div class="row"> -->
+      <i class="fas fa-chevron-right float-left" ng-show="!edit_open" ng-click="edit_open = !edit_open"></i>
+      <div class="col-3 border-right" ng-class="{'collapse': !edit_open}">
         <i class="fas fa-chevron-left float-right" ng-show="edit_open" ng-click="edit_open = !edit_open"></i>
-        
-        <div class="col-3 border-right" ng-class="{'collapse': !edit_open">
-          <i class="fas fa-chevron-right float-right" ng-show="!edit_open" ng-click="edit_open = !edit_open"></i>
 
-          <!-- Nav Tabs-->
-          <ul class="nav nav-tabs nav-justified" id="edit-tab" role="tablist">
-            <li class="nav-item col-xs-6">
-              <a class="nav-link active" href="#edit-persons" id="persons-tab" data-toggle="tab" role="tab" aria-controls="edit-persons" aria-selected="true">
-                <label><i class="fas fa-user"></i> <br>People</label>
-                
-              </a>
-            </li>
-            <li class="nav-item col-xs-6">
-              <a class="nav-link" href="#edit-groups" id="groups-tab" data-toggle="tab" role="tab" aria-controls="edit-groups" aria-selected="false">
-                <label><i class="fas fa-users"></i><br>Groups</label>
-                
-              </a>
-            </li>
-            <li class="nav-item col-xs-6">
-              <a class="nav-link" href="#edit-relationships" id="relationships-tab" data-toggle="tab" role="tab" aria-controls="edit-relationships" aria-selected="false">
-                <label><i class="fas fa-users-cog"></i><br>Relationships</label></i>
-                
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="edit" class="col-3 border-right h-100" ng-class="{'collapse': !edit_open}">
-          <div class="tab-content">
-            <div class="tab-pane active" id="edit-persons" role="tabpanel" aria-labelledby="persons-tab">
-              <editable-list 
-                model="persons"
-                fields="personFields"
-                item-to-string="entityToString">
-              </editable-list>
-            </div>
+        <select 
+          id="graph"
+          class="form-control" 
+          ng-model="graph"
+          ng-options="graph.name for graph in graphs track by graph.id">
+        </select>
 
-            <div class="tab-pane" id="edit-groups" role="tabpanel" aria-labelledby="groups-tab">
-              <editable-list 
-                model="groups"
-                fields="groupFields"
-                item-to-string="entityToString">
-              </editable-list>
-            </div>
+        <!-- Nav Tabs-->
+        <ul class="nav nav-tabs nav-justified" id="edit-tab" role="tablist">
+          <li class="nav-item col-xs-6">
+            <a class="nav-link active" href="#edit-persons" id="persons-tab" data-toggle="tab" role="tab" aria-controls="edit-persons" aria-selected="true">
+              <label><i class="fas fa-user"></i> <br>People</label>
+              
+            </a>
+          </li>
+          <li class="nav-item col-xs-6">
+            <a class="nav-link" href="#edit-groups" id="groups-tab" data-toggle="tab" role="tab" aria-controls="edit-groups" aria-selected="false">
+              <label><i class="fas fa-users"></i><br>Groups</label>
+              
+            </a>
+          </li>
+          <li class="nav-item col-xs-6">
+            <a class="nav-link" href="#edit-relationships" id="relationships-tab" data-toggle="tab" role="tab" aria-controls="edit-relationships" aria-selected="false">
+              <label><i class="fas fa-users-cog"></i><br>Relationships</label></i>
+              
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div id="edit" class="col-3 border-right h-100" ng-class="{'collapse': !edit_open}">
+        <div class="tab-content">
+          <div class="tab-pane active" id="edit-persons" role="tabpanel" aria-labelledby="persons-tab">
+            <editable-list 
+              model="persons"
+              fields="personFields"
+              item-to-string="entityToString">
+            </editable-list>
+          </div>
 
-            <div class="tab-pane" id="edit-relationships" role="tabpanel" aria-labelledby="relationships-tab">
-              <editable-list 
-                model="relationships"
-                fields="relationshipFields"
-                item-to-string="relationshipToString">
-              </editable-list>
-            </div>
+          <div class="tab-pane" id="edit-groups" role="tabpanel" aria-labelledby="groups-tab">
+            <editable-list 
+              model="groups"
+              fields="groupFields"
+              item-to-string="entityToString">
+            </editable-list>
+          </div>
+
+          <div class="tab-pane" id="edit-relationships" role="tabpanel" aria-labelledby="relationships-tab">
+            <editable-list 
+              model="relationships"
+              fields="relationshipFields"
+              item-to-string="relationshipToString">
+            </editable-list>
           </div>
         </div>
-      <!-- </div> -->
+      </div>
     </div>
   </body>
 </html>

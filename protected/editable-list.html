@@ -5,8 +5,8 @@
       <input class="form-control" ng-if="field.type == 'String'" placeholder="{{field.ph}}" ng-model="$ctrl.item[field.name]">
       <input class="form-control" ng-if="field.type == 'Number'" type="number" ng-model="$ctrl.item[field.name]">
       <input class="form-control" ng-if="field.type == 'Date'" type="date" ng-model="$ctrl.item[field.name]" ng-value="field.ph">
-
-      <textarea class="form-control" ng-show="field.type == 'Text'" ng-model="$ctrl.item[field.name]" placeholder="{{field.ph}}"></textarea>
+      <input class="form-control" ng-if="field.type == 'File'" type="file" ng-model="$ctrl.item[field.name]" ng-change="onFileInput(this.files[0])">
+      <textarea class="file form-control" ng-show="field.type == 'Text'" ng-model="$ctrl.item[field.name]" placeholder="{{field.ph}}"></textarea>
       <select 
         class="form-control" 
         ng-if="field.type == 'Select'" 
