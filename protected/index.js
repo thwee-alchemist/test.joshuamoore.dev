@@ -114,16 +114,37 @@ function TestCtrl($scope){
   
   $scope.socket.on('graphs response', result => {
     console.log('fresh graphs', result)
-    result.map(g => {
-      $scope.graphs = [];
-      $scope.graphs.push({
+    $scope.graphs = result.map(g => {
+      return {
         id: g._id,
         name: g._name
-      })
-    })
+      }
+    });
+
+    if($scope.graphs.length > 0){
+      $scope.graph = $scope.graphs[0];
+    }
 
     $scope.$apply();
   });
+
+  $scope.socket.on('persons response', result => {
+    console.log('fresh people', result);
+
+    $scope.persons = result.map(p => {
+      return {
+        name: p._name,
+        picture: p._texture,
+        type: 'person',
+        from: p._from,
+        until: p._until,
+        text: p._text,
+        data: p._data // todo json parse
+      }
+    });
+
+    $scope.$apply();
+  })
 
   $scope.socket.emit('graphs');
 
@@ -143,7 +164,9 @@ function TestCtrl($scope){
   };
 
   $scope.selectGraph = function(){
-    console.log('select graph arguments', arguments)
+    console.log('select graph arguments', arguments);
+
+    $scope.socket.emit('persons', $scope.graph.id)
   }
 }
 
