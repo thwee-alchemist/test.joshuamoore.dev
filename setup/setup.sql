@@ -6,14 +6,13 @@ drop table if exists relationship;
 drop table if exists entity;
 drop table if exists visitor;
 drop table if exists graph;
+drop table if exists device;
 drop procedure if exists insert_entity;
 drop procedure if exists insert_relationship;
 drop procedure if exists share_entity;
 drop procedure if exists share_relationship;
 drop procedure if exists upsert_visitor;
-
 \! echo "... done";
-
 
 
 \! echo "Creating visitor table ... ";
@@ -24,6 +23,18 @@ create table visitor (
   _picture_url varchar(250)
 );
 \! echo "... done";
+
+\! echo "Creating device table ... ";
+create table device (
+  _id int auto_increment primary key,
+  _visitor_id varchar(30),
+  _public_key json
+
+  foreign key (_visitor_id)
+    references visitor(_id)
+    on delete cascade;
+);
+\! echo "... done"
 
 \! echo "Creating graph table ... ";
 create table graph (

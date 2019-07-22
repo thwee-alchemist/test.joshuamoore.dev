@@ -248,6 +248,12 @@ async function setupCrypto($scope){
     console.log('pk response', results)
   });
 
+  $scope.downloadKeyPair = function(){
+    $scope.prepareDownload().then(() => {
+      $('#downloadKeyPair').click();
+    })
+  }
+
   return null;
 }
 

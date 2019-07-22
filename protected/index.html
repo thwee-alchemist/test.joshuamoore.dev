@@ -19,7 +19,7 @@
   <body ng-controller="testCtrl">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <a class="navbar-brand" href="#">leudla.net</a>
-      <button class="navbar-nav navbar-right fas fas-save form-control" id="downloadKeyPair" ng-click="prepareDownload(keyPair); $(this).click();" id="downloadKeyPair">Download your key pair</button>
+      <button class="navbar-nav navbar-right fas fas-save form-control" ng-click="downloadKeyPair();" id="downloadKeyPair"><a download="device.keypair@leudla.net" id="downloadKeyPair">Download your key pair</button>
       
       <input class="navbar-nav navbar-right form-control" id="keyPairUpload" type="file">
     </nav>
