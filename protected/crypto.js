@@ -133,9 +133,7 @@ async function setupCrypto($scope){
   $scope.generateKeyPair = function(){
     generateKeyPair().then(keyPair => {
       $scope.keyPair = keyPair;
-      $scope.prepareDownload($scope.keyPair).then(() => {
-        $('#downloadKeyPair').click();
-      });
+      $scope.prepareDownload($scope.keyPair);
       $scope.$apply();
     });
   }
@@ -198,7 +196,7 @@ async function setupCrypto($scope){
 
         $scope.keyPair = await importKeyPair(keyData);
 
-        $scope.prepareDownload($scope.keyPair);
+        $scope.prepareDownload();
       };
       reader.readAsText(file);
     }
@@ -251,9 +249,8 @@ async function setupCrypto($scope){
   });
 
   $scope.downloadKeyPair = function(){
-    $scope.prepareDownload().then(() => {
-      $('#downloadKeyPair').click();
-    })
+    $scope.prepareDownload();
+    $('#downloadKeyPair').click();
   }
 
   return null;

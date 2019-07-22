@@ -51,6 +51,7 @@ create table device (
 create table graph (
   _id int auto_increment primary key,
   _visitor_id int,
+  _name varchar(250),
 
   foreign key (_visitor_id)
     references visitor(_id)

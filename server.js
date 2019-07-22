@@ -30,8 +30,22 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(user, done) {
-  done(null, user);
+  done(null, user)
 });
+
+var getVisitorId = async function(googleId){
+  return new Promise((resolve, reject) => {    
+    try{
+      conn.query(`select v._id from visitor v where v._google_id = ?;`, [googleId], (error, results, fields) => {
+        if(error) reject(error);
+        resolve(results[0]._id);
+      })
+    }catch(e){
+      reject(error);
+      socket.emit('refresh');
+    }
+  })
+};
 
 passport.use(
   new GoogleStrategy({
@@ -39,7 +53,8 @@ passport.use(
     clientSecret: process.env.TEST_JM_GOOGLE_OAUTH_CLIENT_SECRET,
     callbackURL: "https://leudla.net/auth/google"
   },
-  function(accessToken, refreshToken, profile, cb){
+  async function(accessToken, refreshToken, profile, cb){
+    profile.visitorId = await getVisitorId(profile.id);
     return cb(null, profile);
   }
 ));
@@ -47,8 +62,8 @@ passport.use(
 app.get(
   '/auth/google',
   passport.authenticate('google', {scope: ['profile', 'email']}),
-  (req, res) => {
-    console.log('req.user', req.user);
+  async (req, res) => {
+    console.log('/auth/google, req.user', req.user);
     res.redirect('/protected');
   }
 )
@@ -81,25 +96,14 @@ io.use(function(socket, next){
   sessionMiddleware(socket.request, {}, next);
 })
 io.on('connection', function(socket){
-  try{
-    var user = socket.request.session.passport.user;
-    socket.user = user;
-
-    conn.query(`call upsert_visitor(?, ?, ?, ?);`, [user.id, user.displayName, user.email, user.pictureUrl], (error, results, fields) => {
-      if(error) throw(error);
-      socket.user.visitorId = results.insertId;
-    })
-  }catch(e){
-    console.error(e);
-    socket.emit('refresh');
-  }
 
   socket.on('item added', item => {
     switch(item.type){
       case "entity":
-        conn.query('call upsert_entity(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+        getVisitorId(socket).then(id => {
+          conn.query('call upsert_entity(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
           [
-            socket.user.visitorId,
+            id,
             item.name, 
             item.from,
             item.until,
@@ -111,9 +115,9 @@ io.on('connection', function(socket){
           ],
           function(error, results){
             if(error) throw error;
-            socket.of(`/${item.graph_id}`).broadcast('item added', {"id": results.insertId, "item": item});
+            socket.broadcast.to(`graph ${item.graph_id}`).emit('item added', {"id": results.insertId, "item": item});
           });
-
+        })
         break;
       case "relationship":
         break;
@@ -170,4 +174,43 @@ io.on('connection', function(socket){
     var payload = {from: socket.id, to: msg.to, msg: msg.msg, iv: msg.iv, time: t}
     io.binary(true).to(msg.to).emit('message', payload);
   });
+
+  socket.on('add graph', name => {
+    console.log('add graph, visitorId', socket.request.session.passport.user.visitorId)
+    conn.beginTransaction(err => {
+      conn.query(`
+        insert into graph (_visitor_id, _name)
+        values (?, ?);
+      `, [socket.request.session.passport.user.visitorId, name], 
+      function(error, result){
+        if(error) console.error(error);
+        conn.commit((err) => {
+          if(err) conn.rollback();
+          else socket.emit('add graph response', result.insertId);
+        })
+      })
+    })
+  })
+
+  socket.on('graphs', () => {
+
+    console.log('graphs, visitorId', socket.request.session.passport.user.visitorId)
+    conn.query(`
+      select g._id, g._name 
+      from graph g 
+      where g._visitor_id = ?;`, 
+      [socket.request.session.passport.user.visitorId], 
+      function(error, result){
+        if(error) console.error(error);
+        socket.emit('graphs response', result);
+      });
+  })
+
+  socket.on('select graph', id => {
+    if(socket.currentRoom);
+    socket.leave(socket.currentRoom);
+    socket.join(`graph ${id}`);
+    socket.currentRoom = `graph ${id}`;
+
+  })
 });

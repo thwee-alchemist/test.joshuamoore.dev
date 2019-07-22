@@ -72,6 +72,7 @@ function TestCtrl($scope){
   });
 
   $scope.$on('item added', (e, item) => {
+    // todo revisit this function
     var newItem = {};
     for(var field in item){
       newItem[field] = $scope.encryptMsg(item[field]);
@@ -107,6 +108,43 @@ function TestCtrl($scope){
     
     reader.readAsText(input);
   };
+
+  $scope.graphs =  [];
+
+  
+  $scope.socket.on('graphs response', result => {
+    console.log('fresh graphs', result)
+    result.map(g => {
+      $scope.graphs = [];
+      $scope.graphs.push({
+        id: g._id,
+        name: g._name
+      })
+    })
+
+    $scope.$apply();
+  });
+
+  $scope.socket.emit('graphs');
+
+  $scope.addGraph = function(){
+    var name = prompt("Please enter a name for the graph:");
+    if(name){
+      $scope.socket.emit('add graph', name);
+      $scope.socket.once('add graph response', id => {
+        $scope.graphs.push({
+          'id': id,
+          'name': name
+        })
+
+        $scope.$apply();
+      });
+    }
+  };
+
+  $scope.selectGraph = function(){
+    console.log('select graph arguments', arguments)
+  }
 }
 
 

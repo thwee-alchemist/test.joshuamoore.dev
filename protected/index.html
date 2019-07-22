@@ -33,8 +33,15 @@
           id="graph"
           class="form-control" 
           ng-model="graph"
+          ng-change="selectGraph"
           ng-options="graph.name for graph in graphs track by graph.id">
         </select>
+        <button 
+          id="addGraph"
+          class="form-control btn btn-outline-primary"
+          ng-click="addGraph()">
+          New Graph
+        </button>
 
         <!-- Nav Tabs-->
         <ul class="nav nav-tabs nav-justified" id="edit-tab" role="tablist">
