@@ -54,11 +54,29 @@ passport.use(
     clientSecret: process.env.TEST_JM_GOOGLE_OAUTH_CLIENT_SECRET,
     callbackURL: "https://leudla.net/auth/google"
   },
-  async function(accessToken, refreshToken, profile, cb){
-    profile.visitorId = await getVisitorId(profile.id);
-    return cb(null, profile);
-  }
-));
+  async (accessToken, refreshToken, profile, cb) => {
+    try{
+      conn.beginTransaction(error => {
+        if(error) throw error;
+        
+        console.log(profile);
+        conn.query(`call upsert_visitor(?, ?, ?, ?)`, 
+          [profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value],
+          (err, result) => {
+            if(result._id){
+              profile.visitorId = result._id;
+            }else{
+              profile.visitorId = result.insertId;
+            }
+            cb(null, profile);
+          })
+        return cb(null, profile);
+      })
+    }catch(e){
+      return cb(e, null)
+    }
+  })
+);
 
 app.get(
   '/auth/google',
