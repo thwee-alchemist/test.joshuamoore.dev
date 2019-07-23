@@ -223,26 +223,23 @@ io.on('connection', function(socket){
   socket.on('persons', (graph_id) => {
     try {
       conn.query(`
-        select e.*
-        from entity e
-        where e._visitor_id = ?
-        and e._graph_id = ? 
-        and e._type = 'person';
+        select *
+        from entity
+        where _visitor_id = ?
+        and _graph_id = ? 
+        and  _type = 'person';
       `, [socket.visitorId, graph_id], 
       (error, result) => {
         if(error) throw error;
-        else{
-          console.log(result)
-          socket.emit('persons response', result);
-        }
-      })
+        socket.emit('persons response', result);
+      });
     }catch(e){
       socket.emit('error', e);
     }
   })
 
   /*
-  socket.on('select graph', id => {
+  socket.on('select graph', id => { 
     /* let's skip that for now
     console.log(')
     if(socket.currentRoom);

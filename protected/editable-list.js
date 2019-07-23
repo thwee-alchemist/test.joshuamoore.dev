@@ -18,7 +18,7 @@ function EditableListCtrl($scope){
           break;
 
         case 'hidden':
-          this.templateObj[field.name] = field.ph;
+          this.templateObj[field.name] = field.getValue();
           break;
 
         case 'Date':
@@ -29,6 +29,8 @@ function EditableListCtrl($scope){
 
     this.item = Object.create(this.templateObj);
   };
+
+  $scope.$watchCollection(this.model, () => this.$onInit())
 
   this.addItem = function(item){
     this.model.push(item);

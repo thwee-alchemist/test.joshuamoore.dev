@@ -134,6 +134,7 @@ async function setupCrypto($scope){
     generateKeyPair().then(keyPair => {
       $scope.keyPair = keyPair;
       $scope.prepareDownload($scope.keyPair);
+      $scope.socket.emit('publicKey', $scope.publicKey);
       $scope.$apply();
     });
   }
@@ -170,6 +171,8 @@ async function setupCrypto($scope){
       const publicKey = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
       const privateKey =  await crypto.subtle.exportKey('jwk', keyPair.privateKey);
       const exported = {'publicKey': publicKey, 'privateKey': privateKey};
+
+      $scope.publicKey = publicKey;
 
       localStorage.setItem('keyPair', JSON.stringify(exported));
       dl.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exported)));

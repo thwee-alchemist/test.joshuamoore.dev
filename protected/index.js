@@ -34,30 +34,31 @@ function TestCtrl($scope){
   }
 
   $scope.personFields = [
+    {name: 'id', type: 'hidden', getValue: () => 0},
     {name: 'name', type: 'String', ph: "Full Name"},
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date'},
     {name: 'until', type: 'Date'},
     {name: 'text', type: 'Text', ph: "A place for notes..."},
-    {name: 'type', type: 'hidden', ph: 'person'},
-    {name: 'graph_id', type: 'hidden', getValue: function(){
-      return $scope.graph.id
-    }}
+    {name: 'type', type: 'hidden', ph: 'person', getValue: function(){ return 'person'; }},
+    {name: 'graph_id', type: 'hidden', getValue: function(){ return $scope.graph.id; }}
   ];
 
 
   $scope.groupFields = [
+    {name: 'id', type: 'hidden', getValue: () => 0},
     {name: 'name', type: 'String', ph: "What is the group called?"},
     {name: 'picture', type: 'Text', ph: 'Paste an image URL or base64 encoded image here'},
     {name: 'from', type: 'Date'},
     {name: 'until', type: 'Date'},
     {name: 'text', type: 'Text', ph: "A place for notes..."},
-    {name: 'type', type: 'hidden', ph: 'group'},
-    {name: 'graph_id', type: 'hidden', ph: $scope.graph.id}
+    {name: 'type', type: 'hidden', ph: 'group', getValue: function(){ return 'group'; }},
+    {name: 'graph_id', type: 'hidden', getValue: function(){ return $scope.graph.id; }}
   ];
 
 
   $scope.relationshipFields = [
+    {name: 'id', type: 'hidden', getValue: () => 0},
     {name: 'source', type: 'Select', options: {model: $scope.persons, displayField: 'name', valueField: 'name'}},
     {name: 'type', type: 'Select', options: {model: $scope.relationshipTypes, displayField: 'name', valueField: 'id'}},
     {name: 'target', type: 'Select', options: {model: $scope.groups, displayField: 'name', valueField: 'name'}},
@@ -65,7 +66,7 @@ function TestCtrl($scope){
     {name: 'from', type: 'Date', ph: undefined},
     {name: 'until', type: 'Date', ph: undefined},
     {name: 'text', type: 'Text', ph: "A place for notes..."},
-    {name: 'graph_id', type: 'hidden', ph: $scope.graph.id}
+    {name: 'graph_id', type: 'hidden', getValue: function(){ return $scope.graph.id; }}
   ];
 
   $scope.edit_open = true;
@@ -97,7 +98,7 @@ function TestCtrl($scope){
         newItem[field] = item[field];
       }
 
-      console.log(field, newItem[field], $scope.graph.id);
+      newItem[field] = $scope.graph.id;
     }
 
     
@@ -159,22 +160,26 @@ function TestCtrl($scope){
   });
 
   $scope.socket.on('persons response', result => {
-    console.log('fresh people', result);
+    console.log('fresh people', result, $scope.graph.id);
 
-    $scope.persons = result.map(async p => {
+    $scope.persons = []
+    result.forEach(async (p) => {
+      console.log(p)
       var entity = {
+        id: p._id,
         name: p._name ? (await $scope.decryptMsg(p._name, 'self')) : null,
         picture: p._texture ? (await $scope.decryptMsg(p._texture, 'self')) : null,
         type: 'person',
         from: p._from ? (await $scope.decryptMsg(p._from, 'self')): null,
         until: p._until ? (await $scope.decryptMsg(p._until, 'self')) : null,
         text: p._text ? (await $scope.decryptMsg(p._text, 'self')) : null,
-        data: p._data ? (await $scope.decryptMsg(p._data, 'self')) : null // todo json parse
+        data: p._data ? (await $scope.decryptMsg(p._data, 'self')) : null, // todo json parse
+        graph_id: p._graph_id
       };
 
       console.log('decrypted', entity);
 
-      return entity;
+      $scope.persons.push(entity);
     });
 
     $scope.$apply();
@@ -196,7 +201,7 @@ function TestCtrl($scope){
         $scope.graphs.push(graph)
         $scope.graph = graph;
 
-        $scope.socket.emit('persons')
+        $scope.socket.emit('persons', $scope.graph.id)
 
         $scope.$apply();
       });
