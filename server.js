@@ -217,7 +217,7 @@ io.on('connection', function(socket){
       select g._id, g._name 
       from graph g 
       where g._visitor_id = ?;`, 
-      [socket.request.session.passport.user.visitorId], 
+      [socket.visitorId], 
       function(error, result){
         if(error) console.error(error);
         socket.emit('graphs response', result);

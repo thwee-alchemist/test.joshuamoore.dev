@@ -135,7 +135,7 @@ function TestCtrl($scope){
   $scope.socket.on('graphs response', result => {
     console.log('fresh graphs', result)
 
-    if($scope.graphs.length > 0){
+    if(result.length > 0){
       $scope.graphs = result.map(g => {
         return {
           id: g._id,
@@ -177,7 +177,7 @@ function TestCtrl($scope){
   $scope.addGraph = function(){
     var name = prompt("Please enter a name for the graph:");
     if(name){
-      $scope.off('add graph response')
+      $scope.socket.off('add graph response')
       $scope.socket.on('add graph response', id => {
         $scope.socket.emit('select graph')
         
