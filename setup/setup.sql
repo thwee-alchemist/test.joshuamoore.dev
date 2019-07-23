@@ -63,12 +63,12 @@ create table graph (
 create table entity (
   _id int auto_increment primary key,
   _visitor_id int,
-  _name text,
-  _from text,
-  _until text,
-  _texture text,
-  _text text,
-  _data text, 
+  _name json,
+  _from json,
+  _until json,
+  _texture json,
+  _text json,
+  _data json, 
   _type varchar(50),
   _graph_id int,
 
@@ -152,12 +152,12 @@ delimiter //
 create procedure insert_entity
 (
   in _visitor_id int, 
-  in _name text,
-  in _from text,
-  in _until text,
-  in _texture text,
-  in _text text,
-  in _data text,
+  in _name json,
+  in _from json,
+  in _until json,
+  in _texture json,
+  in _text json,
+  in _data json,
   in _type varchar(50),
   in _graph_id int
 )
@@ -168,6 +168,8 @@ begin
 
   insert into entity (_visitor_id, _name, _from, _until, _texture, _text, _data, _type, _graph_id)
   values (_visitor_id, _name, _from, _until, _texture, _data, _type, graph_id);
+
+  select last_insert_id() as _id;
 
   commit;
 end //
@@ -185,8 +187,8 @@ create procedure insert_relationship
   in _name varchar(250),
   in _from datetime,
   in _until datetime,
-  in _texture text,
-  in _text text,
+  in _texture json,
+  in _text json,
   in _data json,
   in _type varchar(50)
 )
@@ -222,8 +224,8 @@ begin
   declare v_name varchar(250);
   declare v_from datetime;
   declare v_until datetime;
-  declare v_texture text;
-  declare v_text text;
+  declare v_texture json;
+  declare v_text json;
   declare v_data json;
   declare v_type varchar(50);
 
@@ -259,8 +261,8 @@ begin
   declare v_name varchar(250);
   declare v_from datetime;
   declare v_until datetime;
-  declare v_texture text;
-  declare v_text text;
+  declare v_texture json;
+  declare v_text json;
   declare v_data json;
   declare v_type varchar(50);
   

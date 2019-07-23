@@ -87,19 +87,21 @@ function TestCtrl($scope){
     console.log('item added', item, e)
 
     for(var field in item){
-      newItem[field] = !(field in ['graph_id', 'id', 'source', 'target', 'type']) && item[field]  ?
-        JSON.stringify(await $scope.encryptMsg(item[field])) : 
-        item[field]; // can be extended to in
+      if(!(field in ['graph_id', 'id', 'source', 'target', 'type']) && item[field]){
+        newItem[field] = JSON.stringify(await $scope.encryptMsg(item[field], 'self'));
+      }else{
+        newItem[field] = item[field];
+      }
     }
 
-    $scope.socket.off('item added response');
+    
     $scope.socket.on('item added response', (result) => {
       console.log('item added response');
       newItem.id = result.id;
+      $scope.socket.off('item added response');
     })
 
     $scope.socket.emit('item added', newItem);
-    console.log('item added emitted', newItem);
   })
 
   $scope.$on('item updated', (e, item) => {

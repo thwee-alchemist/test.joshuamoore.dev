@@ -111,37 +111,30 @@ io.on('connection', function(socket){
 
   socket.on('item added', item => {
     console.log('item added', socket.visitorId, item)
-    switch(item.type){
-      case "person":
-        conn.beginTransaction((error) => {
-          conn.query('call insert_entity(?, ?, ?, ?, ?, ?, ?, ?, ?);', 
-          [
-            socket.visitorId,
-            item.name, 
-            item.from,
-            item.until,
-            item.texture,
-            item.text, 
-            item.data, 
-            item.type, 
-            item.graph_id
-          ],
-          function(error, results){
-            console.log('insert_entity ', error, results)
-            if(error) socket.emit('error', error)
-            socket.emit('item added response', {"id": results.insertId, "item": item});
-          });
-
-          conn.commit(err => {
-            console.log('err', err)
-            socket.emit('error', err)
-          });
+    conn.beginTransaction((error) => {
+      conn.query(`
+        insert into entity (_visitor_id, _name, _from, _until, _texture, _text, _data, _type, _graph_id)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?);
+      `, 
+      [
+        socket.visitorId,
+        item.name, 
+        item.from,
+        item.until,
+        item.texture,
+        item.text, 
+        item.data, 
+        'person', 
+        item.graph_id
+      ],
+      (error, results) => {
+        if(error) throw error;
+        conn.commit((err, results) => {
+          if(error) console,error(err)
+          socket.emit('item added response', results.insertId);
         })
-       break;
-      case "relationship":
-        break;
-
-    }
+      });
+    })
     
     // here would be time to use that fancy currying they speak of, but maybe it's just that. 
     // also, is React a phase? 

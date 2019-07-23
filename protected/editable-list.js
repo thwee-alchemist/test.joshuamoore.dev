@@ -17,6 +17,10 @@ function EditableListCtrl($scope){
           this.templateObj[field.name] = Reflect.construct(eval(field.type), []);
           break;
 
+        case 'hidden':
+          this.templateObj[field.name] = field.ph;
+          break;
+
         case 'Date':
         default:
           this.templateObj[field.name] = null;

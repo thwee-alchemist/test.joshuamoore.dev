@@ -3,10 +3,10 @@
 
 
 async function encrypt(message, secretKey){
-  if(message.length % 2 !== 0){
+  if(message.length % 2){
     message += ' ';
   }
-  console.log(secretKey);
+
   let iv = crypto.getRandomValues(new Uint8Array(12));
   let encoded = (new TextEncoder).encode(message);
 
@@ -19,7 +19,7 @@ async function encrypt(message, secretKey){
     encoded
   )
 
-  return {ciphertext: ciphertext, 'iv': iv};
+  return {'ciphertext': ciphertext, 'iv': iv};
   // return {ciphertext: ciphertext, iv: iv}
 }
 
@@ -202,18 +202,17 @@ async function setupCrypto($scope){
     }
   })
 
-  $scope.encryptMsg = async function(cleartext){
+  $scope.encryptMsg = async function(cleartext, other){
     var ciphertext;
-    if(!$scope.secretKey){
-      try{
-        $scope.secretKey = await $scope.deriveSecretKey('self'); // Thanks Britney!
-      }catch(e){
-        console.error(e);
-      }
+    try{
+      var secretKey = await $scope.deriveSecretKey(other); // Thanks Britney!
+    }catch(e){
+      console.error(e);
+      return null;
     }
 
     try{
-      var r = await encrypt(cleartext, $scope.secretKey);
+      var r = await encrypt(cleartext, secretKey);
       ciphertext = buffer2string(r.ciphertext);
       console.log('ciphertext', ciphertext)
     }catch(e){
