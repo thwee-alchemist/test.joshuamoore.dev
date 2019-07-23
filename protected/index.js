@@ -40,8 +40,11 @@ function TestCtrl($scope){
     {name: 'until', type: 'Date'},
     {name: 'text', type: 'Text', ph: "A place for notes..."},
     {name: 'type', type: 'hidden', ph: 'person'},
-    {name: 'graph_id', type: 'hidden', ph: $scope.graph.id}
+    {name: 'graph_id', type: 'hidden', getValue: function(){
+      return $scope.graph.id
+    }}
   ];
+
 
   $scope.groupFields = [
     {name: 'name', type: 'String', ph: "What is the group called?"},
@@ -86,12 +89,15 @@ function TestCtrl($scope){
 
     console.log('item added', item, e)
 
+    console.log(field)
     for(var field in item){
-      if(!(field in ['graph_id', 'id', 'source', 'target', 'type']) && item[field]){
-        newItem[field] = JSON.stringify(await $scope.encryptMsg(item[field], 'self'));
+      if((['graph_id', 'id', 'source', 'target', 'type'].indexOf(field) == -1) && item[field]){
+        newItem[field] = await $scope.encryptMsg(item[field], 'self');
       }else{
         newItem[field] = item[field];
       }
+
+      console.log(field, newItem[field], $scope.graph.id);
     }
 
     
@@ -101,7 +107,7 @@ function TestCtrl($scope){
       $scope.socket.off('item added response');
     })
 
-    $scope.socket.emit('item added', newItem);
+    $scope.socket.binary(true).emit('item added', newItem);
   })
 
   $scope.$on('item updated', (e, item) => {
@@ -199,7 +205,7 @@ function TestCtrl($scope){
     }
   };
 
-  $scope.selectGraph = function(){
+  $scope.onSelectGraph = function(){
     console.log('selection changed')
     $scope.socket.emit('persons', $scope.graph.id);
   }

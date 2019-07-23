@@ -118,20 +118,23 @@ io.on('connection', function(socket){
       `, 
       [
         socket.visitorId,
-        item.name, 
-        item.from,
-        item.until,
-        item.texture,
-        item.text, 
-        item.data, 
+        JSON.stringify(item.name), 
+        JSON.stringify(item.from),
+        JSON.stringify(item.until),
+        JSON.stringify(item.texture),
+        JSON.stringify(item.text), 
+        JSON.stringify(item.data), 
         'person', 
         item.graph_id
       ],
       (error, results) => {
         if(error) throw error;
+
+        socket.emit('item added response', results.insertId);
+
         conn.commit((err, results) => {
+          
           if(error) console,error(err)
-          socket.emit('item added response', results.insertId);
         })
       });
     })
