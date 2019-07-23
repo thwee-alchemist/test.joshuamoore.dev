@@ -33,21 +33,6 @@ passport.deserializeUser(function(user, done) {
   done(null, user)
 });
 
-var getVisitorId = async function(googleId){
-  return new Promise((resolve, reject) => {    
-    try{
-      conn.query(`select v._id from visitor v where v._google_id = ?;`, [googleId], (error, results, fields) => {
-        if(error) reject(error);
-        console.log(results);
-        resolve(results[0]._id);
-      })
-    }catch(e){
-      reject(error);
-      socket.emit('refresh');
-    }
-  })
-};
-
 passport.use(
   new GoogleStrategy({
     clientID: process.env.TEST_JM_GOOGLE_OAUTH_CLIENT_ID,
@@ -59,18 +44,21 @@ passport.use(
       conn.beginTransaction(error => {
         if(error) throw error;
         
-        console.log(profile);
         conn.query(`call upsert_visitor(?, ?, ?, ?)`, 
           [profile.id, profile.displayName, profile.emails[0].value, profile.photos[0].value],
           (err, result) => {
-            if(result._id){
-              profile.visitorId = result._id;
+            if(err) return cb(err, null);
+
+            console.log(result);
+
+            if(result && result.length){
+              profile.visitorId = result[0][0]._id;
             }else{
               profile.visitorId = result.insertId;
             }
+
             cb(null, profile);
-          })
-        return cb(null, profile);
+          });
       })
     }catch(e){
       return cb(e, null)

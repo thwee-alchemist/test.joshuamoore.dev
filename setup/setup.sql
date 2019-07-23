@@ -110,10 +110,13 @@ create procedure upsert_visitor (
   in _picture_url varchar(250)
 )
 begin
-  declare __visitor_id varchar(50);
+  declare _id int;
+  declare __visitor_id int;
 
   set autocommit = 0;
   start transaction;
+
+  select 0 into _id;
 
   select v._id into __visitor_id
   from visitor v
@@ -125,16 +128,18 @@ begin
       begin
         insert into visitor (_google_id, _display_name, _email, _picture_url)
         values (_google_id, _display_name, _email, _picture_url);
+        
+        select last_insert_id() into _id;
       end;
 
     when __visitor_id is not null
     then 
       begin 
-        select v._id 
-        from visitor v
-        where v._google_id = _google_id;
+        select __visitor_id into _id;
       end;
   end case;
+
+  select _id;
 
   commit;
 end //
